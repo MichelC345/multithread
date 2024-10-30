@@ -167,10 +167,8 @@ int main() {
     // número de threads
     const int nt = 1;
     vector<thread> threads;
-    for(int i = 0; i < nt; i++){
-        threads.emplace_back(simularEntrada, ref(estoque), vezes, qtdEntrada);
-        threads.emplace_back(simularSaida, ref(estoque), vezes, qtdSaida);
-    }
+    threads.emplace_back(simularEntrada, ref(estoque), vezes, qtdEntrada);
+    threads.emplace_back(simularSaida, ref(estoque), vezes, qtdSaida);
     
     for (auto& t : threads) {
         t.join();
