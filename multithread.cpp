@@ -165,7 +165,7 @@ int main() {
     const int vezes = 50, qtdEntrada = 1, qtdSaida = 1;
     
     vector<thread> threads;
-    # Duas threads
+    // Duas threads
     threads.emplace_back(simularEntrada, ref(estoque), vezes, qtdEntrada);
     threads.emplace_back(simularSaida, ref(estoque), vezes, qtdSaida);
     
