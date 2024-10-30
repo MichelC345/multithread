@@ -1,8 +1,11 @@
+
 #include <iostream>
 #include <unordered_map>
 #include <string>
 #include <random>
 #include <chrono>
+#include <vector>
+#include <thread>
 
 using namespace std;
 
@@ -28,7 +31,7 @@ public:
         if (quantidade >= qtd) {
             quantidade -= qtd;
         } else {
-            cout << "Estoque insuficiente para retirada de " << nome << endl;
+            std::cout << "Estoque insuficiente para retirada de " << nome << "!" << std::endl;
         }
         //cout << "Removendo " << qtd << endl;
     }
@@ -69,17 +72,19 @@ public:
     }
 
     void entrada(const string& nome, int qtd) {
-        unordered_map<string, Produto>::iterator it = produtos.find(nome);
+        //unordered_map<string, Produto>::iterator it = produtos.find(nome);
+        auto it = produtos.find(nome);
         if (it != produtos.end()) {
             it->second.adicionarEstoque(qtd);
-            //cout << "Adicionou " << qtd << " unidades de " << nome << " ao estoque." << endl;
+           // cout << "Adicionou " << qtd << " unidades de " << nome << " ao estoque." << endl;
         } else {
             //cout << "Produto " << nome << " nao encontrado no estoque para entrada." << endl;
         }
     }
 
     void saida(const string& nome, int qtd) {
-        unordered_map<string, Produto>::iterator it = produtos.find(nome);
+        //unordered_map<string, Produto>::iterator it = produtos.find(nome);
+        auto it = produtos.find(nome);
         if (it != produtos.end()) {
             it->second.retirarEstoque(qtd);
             //cout << "Removeu " << qtd << " unidades de " << nome << " do estoque." << endl;
@@ -89,20 +94,22 @@ public:
     }
 
     void novoPreco(const string& nome, float preco) {
-        unordered_map<string, Produto>::iterator it = produtos.find(nome);
+        //unordered_map<string, Produto>::iterator it = produtos.find(nome);
+        auto it = produtos.find(nome);
         if (it != produtos.end()) {
             it->second.atualizarPreco(preco);
-            //cout << "Aturalizou preco do produto " << preco << " para " << preco << endl;
+           // cout << "Aturalizou preco do produto " << preco << " para " << preco << endl;
         } else {
             //cout << "Produto " << nome << " nao encontrado no estoque para saida." << endl;
         }
     }
 
     void novoDesc(const string& nome, float desc) {
-        unordered_map<string, Produto>::iterator it = produtos.find(nome);
+        //unordered_map<string, Produto>::iterator it = produtos.find(nome);
+        auto it = produtos.find(nome);
         if (it != produtos.end()) {
             it->second.atualizarDesconto(desc);
-            //cout << "Aturalizou preco do produto " << preco << " para " << preco << endl;
+            //cout << "Aturalizou desconto do produto " << nome << " para " << desc << endl;
         } else {
             //cout << "Produto " << nome << " nao encontrado no estoque para saida." << endl;
         }
@@ -124,6 +131,28 @@ float gerarValorAleatorio(float min, float max) {
     return dist(gen);
 }
 
+void simularEntrada(Estoque& estoque, int vezes, int quantidade) {
+    for (int i = 0; i < vezes; i++) {
+        estoque.entrada("ProdutoA", quantidade);
+        estoque.entrada("ProdutoB", quantidade);
+        estoque.novoPreco("ProdutoA", gerarValorAleatorio(6.0, 12.0));
+        estoque.novoPreco("ProdutoB", gerarValorAleatorio(6.0, 12.0));
+        estoque.novoDesc("ProdutoA", gerarValorAleatorio(0.0, 1.0));
+        estoque.novoDesc("ProdutoB", gerarValorAleatorio(0.0, 1.0));
+    }
+}
+
+void simularSaida(Estoque& estoque, int vezes, int quantidade) {
+    for (int i = 0; i < vezes; i++) {
+        estoque.saida("ProdutoA", quantidade);
+        estoque.saida("ProdutoB", quantidade);
+        estoque.novoPreco("ProdutoA", gerarValorAleatorio(6.0, 12.0));
+        estoque.novoPreco("ProdutoB", gerarValorAleatorio(6.0, 12.0));
+        estoque.novoDesc("ProdutoA", gerarValorAleatorio(0.0, 1.0));
+        estoque.novoDesc("ProdutoB", gerarValorAleatorio(0.0, 1.0));
+    }
+}
+
 int main() {
     Estoque estoque;
     int i;
@@ -133,22 +162,14 @@ int main() {
 
     auto inicio = chrono::high_resolution_clock::now();
 
-    for(i = 0; i < 100; i++) {
-        estoque.entrada("ProdutoA", 10);
-        estoque.novoPreco("ProdutoA", gerarValorAleatorio(5.0, 10.0));
-        estoque.novoDesc("ProdutoA", gerarValorAleatorio(0.0, 1.0));
-        estoque.entrada("ProdutoB", 10);
-        estoque.novoPreco("ProdutoB", gerarValorAleatorio(6.0, 12.0));
-        estoque.novoDesc("ProdutoB", gerarValorAleatorio(0.0, 1.0));
-    }
+    const int vezes = 50, qtdEntrada = 1, qtdSaida = 1;
     
-    for(i = 0; i < 100; i++) {
-        estoque.saida("ProdutoB", 10);
-        estoque.novoPreco("ProdutoB", gerarValorAleatorio(6.0, 12.0));
-        estoque.novoDesc("ProdutoB", gerarValorAleatorio(0.0, 1.0));
-        estoque.saida("ProdutoA", 10);
-        estoque.novoPreco("ProdutoA", gerarValorAleatorio(5.0, 10.0));
-        estoque.novoDesc("ProdutoA", gerarValorAleatorio(0.0, 1.0));
+    vector<thread> threads;
+    threads.emplace_back(simularEntrada, ref(estoque), vezes, qtdEntrada);
+    threads.emplace_back(simularSaida, ref(estoque), vezes, qtdSaida);
+    
+    for (auto& t : threads) {
+        t.join();
     }
 
     auto fim = chrono::high_resolution_clock::now();
