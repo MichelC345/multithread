@@ -18,23 +18,18 @@ private:
 
 public:
     Produto(string nome, int quantidade, float valor, float desconto) : nome(nome), quantidade(quantidade), valor(valor), desconto(desconto) {}
-    ~Produto() {
-        //cout << "Drestruido" << endl;
-    }
+    ~Produto() {}
 
     void adicionarEstoque(int qtd) {
         quantidade += qtd;
-        //cout << "Adicioonando "<< qtd << endl;
     }
 
     void retirarEstoque(int qtd) {
         quantidade -= qtd;
-        //cout << "Removendo " << qtd << endl;
     }
 
     void atualizarPreco(float preco) {
         valor = preco;
-        //cout << "Preco atualizado "<< preco << endl;
     }
 
     void atualizarDesconto(float desc) {
@@ -44,12 +39,11 @@ public:
     int getQuantidade() const { return quantidade; }
     string getNome() const { return nome; }
     float getPreco() const { 
-        return valor * (1.0 - desconto); 
+        return valor; 
     }
     float getDesconto() const { return desconto; }
 };
 
-// As funções de entrada e saída criam o problema do produtor / consumidor
 class Estoque {
 private:
     unordered_map<string, Produto> produtos;
@@ -58,17 +52,13 @@ private:
     const int min = 0;
 
 public:
-    Estoque() {
-        //cout << "Estoque criado!" << endl;
-    }
+    Estoque() {}
 
-    ~Estoque() {
-        //cout << "Estoque destruido!" << endl;
-    }
+    ~Estoque() {}
 
     void adicionarProduto(const string& nome, int quantidadeInicial, float precoInicial, float descInicial) {
         produtos.emplace(nome, Produto(nome, quantidadeInicial, precoInicial, descInicial));
-        //cout << "Produto " << nome << " adicionado ao estoque com quantidade " << quantidadeInicial << " e preco: " << precoInicial << endl;
+        //cout << nome << " adicionado ao estoque com quantidade: " << quantidadeInicial << " e preco: " << precoInicial << endl;
     }
 
     void removerProduto(const string& nome) {
@@ -76,35 +66,27 @@ public:
         if (it != produtos.end()) {
             produtos.erase(it);
             //cout << "Produto " << nome << " removido do estoque." << endl;
-        } else {
-            //cout << "Produto " << nome << " não encontrado no estoque para remoção." << endl;
         }
     }
+
+    // As funções de entrada e saída criam o problema do produtor / consumidor
     void entrada(const string& nome, int qtd) {;
         auto it = produtos.find(nome);
-        if (it != produtos.end()) {
-            while (it->second.getQuantidade() + qtd > max){
-                //cout << "Esperando remover...\n";
-            }
+        if (it != produtos.end()) { // Descomente o while para colocar uma verificação de limite
+           // while (it->second.getQuantidade() + qtd > max){}
             lock_guard<mutex> lock(mtx);
             it->second.adicionarEstoque(qtd);
            // cout << "Adicionou " << qtd << " unidades de " << nome << " ao estoque." << endl;
-        } else {
-            //cout << "Produto " << nome << " nao encontrado no estoque." << endl;
         }
     }
 
     void saida(const string& nome, int qtd) {
         auto it = produtos.find(nome);
         if (it != produtos.end()) {
-            while (it->second.getQuantidade() - qtd < min){
-               // cout << "Esperando entrada...\n";
-            }
+           // while (it->second.getQuantidade() - qtd < min){}
             lock_guard<mutex> lock(mtx);
             it->second.retirarEstoque(qtd);
             //cout << "Removeu " << qtd << " unidades de " << nome << " do estoque." << endl;
-        } else {
-            //cout << "Produto " << nome << " nao encontrado no estoque." << endl;
         }
     }
 
@@ -114,8 +96,6 @@ public:
             lock_guard<mutex> lock(mtx);
             it->second.atualizarPreco(preco);
            // cout << "Preco do produto " << nome << " atualizado para " << preco << endl;
-        } else {
-            //cout << "Produto " << nome << " nao encontrado no estoque." << endl;
         }
     }
 
@@ -125,8 +105,6 @@ public:
             lock_guard<mutex> lock(mtx);
             it->second.atualizarDesconto(desc);
             //cout << "Aturalizou desconto do produto " << nome << " para " << desc << endl;
-        } else {
-            //cout << "Produto " << nome << " nao encontrado no estoque." << endl;
         }
     }
 
@@ -150,10 +128,10 @@ void simularEntrada(Estoque& estoque, int vezes, int quantidade) {
     for (int i = 0; i < vezes; i++) {
         estoque.entrada("ProdutoA", quantidade);
         estoque.entrada("ProdutoB", quantidade);
-        estoque.novoPreco("ProdutoA", gerarValorAleatorio(6.0, 12.0));
-        estoque.novoPreco("ProdutoB", gerarValorAleatorio(6.0, 12.0));
-        estoque.novoDesc("ProdutoA", gerarValorAleatorio(0.0, 1.0));
-        estoque.novoDesc("ProdutoB", gerarValorAleatorio(0.0, 1.0));
+        estoque.novoPreco("ProdutoA", gerarValorAleatorio(6.0, 8.0));
+        estoque.novoPreco("ProdutoB", gerarValorAleatorio(6.0, 8.0));
+        estoque.novoDesc("ProdutoA", gerarValorAleatorio(0.2, 0.5));
+        estoque.novoDesc("ProdutoB", gerarValorAleatorio(0.2, 0.5));
     }
 }
 
@@ -161,10 +139,10 @@ void simularSaida(Estoque& estoque, int vezes, int quantidade) {
     for (int i = 0; i < vezes; i++) {
         estoque.saida("ProdutoA", quantidade);
         estoque.saida("ProdutoB", quantidade);
-        estoque.novoPreco("ProdutoA", gerarValorAleatorio(6.0, 12.0));
-        estoque.novoPreco("ProdutoB", gerarValorAleatorio(6.0, 12.0));
-        estoque.novoDesc("ProdutoA", gerarValorAleatorio(0.0, 1.0));
-        estoque.novoDesc("ProdutoB", gerarValorAleatorio(0.0, 1.0));
+        estoque.novoPreco("ProdutoA", gerarValorAleatorio(8.0, 10.0));
+        estoque.novoPreco("ProdutoB", gerarValorAleatorio(8.0, 10.0));
+        estoque.novoDesc("ProdutoA", gerarValorAleatorio(0.0, 0.2));
+        estoque.novoDesc("ProdutoB", gerarValorAleatorio(0.0, 0.2));
     }
 }
 
@@ -177,12 +155,11 @@ int main() {
     estoque.adicionarProduto("ProdutoB", 0, 6.66, 0.0);
 
     auto inicio = chrono::high_resolution_clock::now();
-
     
-    // número de threads
-    const int nt = 4;
+    // número de threads = número de trabalhadores
+    const int nt = 2;
     vector<thread> threads;
-    for(int i = 0; i < nt; i++){
+    for(i = 0; i < nt; i++){
         threads.emplace_back(simularEntrada, ref(estoque), vezes, qtdEntrada);
         threads.emplace_back(simularSaida, ref(estoque), vezes, qtdSaida);
     }
