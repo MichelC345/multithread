@@ -3,6 +3,9 @@
 #include <string>
 #include <random>
 #include <chrono>
+#include <vector>
+#include <thread>
+#include <mutex>
 
 using namespace std;
 
@@ -40,16 +43,19 @@ public:
 
     int getQuantidade() const { return quantidade; }
     string getNome() const { return nome; }
-    float getPreco() const {
-        return valor * (1.0 - desconto);
+    float getPreco() const { 
+        return valor * (1.0 - desconto); 
     }
     float getDesconto() const { return desconto; }
 };
 
+// As funções de entrada e saída criam o problema do produtor / consumidor
 class Estoque {
 private:
     unordered_map<string, Produto> produtos;
-    const int max = 50, min = 0;
+    mutex mtx;
+    const int max = 50;
+    const int min = 0;
 
 public:
     Estoque() {
@@ -65,43 +71,62 @@ public:
         //cout << "Produto " << nome << " adicionado ao estoque com quantidade " << quantidadeInicial << " e preco: " << precoInicial << endl;
     }
 
-    void entrada(const string& nome, int qtd) {
+    void removerProduto(const string& nome) {
         auto it = produtos.find(nome);
         if (it != produtos.end()) {
-            it->second.adicionarEstoque(qtd);
-            //cout << "Adicionou " << qtd << " unidades de " << nome << " ao estoque." << endl;
+            produtos.erase(it);
+            //cout << "Produto " << nome << " removido do estoque." << endl;
         } else {
-            //cout << "Produto " << nome << " nao encontrado no estoque para entrada." << endl;
+            //cout << "Produto " << nome << " não encontrado no estoque para remoção." << endl;
+        }
+    }
+    void entrada(const string& nome, int qtd) {;
+        auto it = produtos.find(nome);
+        if (it != produtos.end()) {
+            while (it->second.getQuantidade() + qtd > max){
+                //cout << "Esperando remover...\n";
+            }
+            lock_guard<mutex> lock(mtx);
+            it->second.adicionarEstoque(qtd);
+           // cout << "Adicionou " << qtd << " unidades de " << nome << " ao estoque." << endl;
+        } else {
+            //cout << "Produto " << nome << " nao encontrado no estoque." << endl;
         }
     }
 
     void saida(const string& nome, int qtd) {
         auto it = produtos.find(nome);
         if (it != produtos.end()) {
+            while (it->second.getQuantidade() - qtd < min){
+               // cout << "Esperando entrada...\n";
+            }
+            lock_guard<mutex> lock(mtx);
             it->second.retirarEstoque(qtd);
             //cout << "Removeu " << qtd << " unidades de " << nome << " do estoque." << endl;
         } else {
-            //cout << "Produto " << nome << " nao encontrado no estoque para saida." << endl;
+            //cout << "Produto " << nome << " nao encontrado no estoque." << endl;
         }
     }
 
     void novoPreco(const string& nome, float preco) {
         auto it = produtos.find(nome);
         if (it != produtos.end()) {
+            lock_guard<mutex> lock(mtx);
             it->second.atualizarPreco(preco);
-            //cout << "Aturalizou preco do produto " << preco << " para " << preco << endl;
+           // cout << "Preco do produto " << nome << " atualizado para " << preco << endl;
         } else {
-            //cout << "Produto " << nome << " nao encontrado no estoque para saida." << endl;
+            //cout << "Produto " << nome << " nao encontrado no estoque." << endl;
         }
     }
 
     void novoDesc(const string& nome, float desc) {
         auto it = produtos.find(nome);
         if (it != produtos.end()) {
+            lock_guard<mutex> lock(mtx);
             it->second.atualizarDesconto(desc);
-            //cout << "Aturalizou preco do produto " << preco << " para " << preco << endl;
+            //cout << "Aturalizou desconto do produto " << nome << " para " << desc << endl;
         } else {
-            //cout << "Produto " << nome << " nao encontrado no estoque para saida." << endl;
+            //cout << "Produto " << nome << " nao encontrado no estoque." << endl;
         }
     }
 
@@ -115,9 +140,9 @@ public:
 };
 
 float gerarValorAleatorio(float min, float max) {
-    static random_device rd;
-    static mt19937 gen(rd());
-    uniform_real_distribution<> dist(min, max);
+    static random_device rd;                           
+    static mt19937 gen(rd());                          
+    uniform_real_distribution<> dist(min, max);   
     return dist(gen);
 }
 
@@ -150,10 +175,21 @@ int main() {
 
     estoque.adicionarProduto("ProdutoA", 0, 5.99, 0.0);
     estoque.adicionarProduto("ProdutoB", 0, 6.66, 0.0);
+
     auto inicio = chrono::high_resolution_clock::now();
 
-    simularEntrada(estoque, vezes, qtdEntrada);
-    simularSaida(estoque, vezes, qtdSaida);
+    
+    // número de threads
+    const int nt = 4;
+    vector<thread> threads;
+    for(int i = 0; i < nt; i++){
+        threads.emplace_back(simularEntrada, ref(estoque), vezes, qtdEntrada);
+        threads.emplace_back(simularSaida, ref(estoque), vezes, qtdSaida);
+    }
+    
+    for (auto& t : threads) {
+        t.join();
+    }
 
     auto fim = chrono::high_resolution_clock::now();
     chrono::duration<double> duracao = fim - inicio;
