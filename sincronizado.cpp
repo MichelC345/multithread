@@ -151,7 +151,7 @@ void simularSaida(Estoque& estoque, int vezes, int quantidade) {
     }
 }
 
-void lerProdutosDeArquivo(const string& nomeArquivo, Estoque& estoque) {
+void lerProdutosArquivo(const string& nomeArquivo, Estoque& estoque) {
     ifstream arquivo(nomeArquivo);
     if (!arquivo) {
         cerr << "Erro ao abrir o arquivo " << nomeArquivo << endl;
@@ -172,7 +172,7 @@ int main() {
     int i;
     const int vezes = 100, qtdEntrada = 1, qtdSaida = 1;
 
-    lerProdutosDeArquivo("produtos.txt", estoque);
+    lerProdutosArquivo("produtos.txt", estoque);
 
     auto inicio = chrono::high_resolution_clock::now();
     
