@@ -110,10 +110,19 @@ void simularEntrada(Estoque& estoque, int vezes, int quantidade) {
     for (int i = 0; i < vezes; i++) {
         estoque.entrada("ProdutoA", quantidade);
         estoque.entrada("ProdutoB", quantidade);
+        estoque.entrada("ProdutoC", quantidade);
+        estoque.entrada("ProdutoD", quantidade);
+        estoque.entrada("ProdutoE", quantidade);
         estoque.novoPreco("ProdutoA", gerarValorAleatorio(6.0, 8.0));
         estoque.novoPreco("ProdutoB", gerarValorAleatorio(6.0, 8.0));
+        estoque.novoPreco("ProdutoC", gerarValorAleatorio(7.0, 9.0));
+        estoque.novoPreco("ProdutoD", gerarValorAleatorio(7.0, 9.0));
+        estoque.novoPreco("ProdutoE", gerarValorAleatorio(8.0, 10.0));
         estoque.novoDesc("ProdutoA", gerarValorAleatorio(0.2, 0.5));
         estoque.novoDesc("ProdutoB", gerarValorAleatorio(0.2, 0.5));
+        estoque.novoDesc("ProdutoC", gerarValorAleatorio(0.2, 0.5));
+        estoque.novoDesc("ProdutoD", gerarValorAleatorio(0.2, 0.5));
+        estoque.novoDesc("ProdutoE", gerarValorAleatorio(0.2, 0.5));
     }
 }
 
@@ -121,10 +130,19 @@ void simularSaida(Estoque& estoque, int vezes, int quantidade) {
     for (int i = 0; i < vezes; i++) {
         estoque.saida("ProdutoA", quantidade);
         estoque.saida("ProdutoB", quantidade);
+        estoque.saida("ProdutoC", quantidade);
+        estoque.saida("ProdutoD", quantidade);
+        estoque.saida("ProdutoE", quantidade);
         estoque.novoPreco("ProdutoA", gerarValorAleatorio(8.0, 10.0));
         estoque.novoPreco("ProdutoB", gerarValorAleatorio(8.0, 10.0));
+        estoque.novoPreco("ProdutoC", gerarValorAleatorio(9.0, 11.0));
+        estoque.novoPreco("ProdutoD", gerarValorAleatorio(9.0, 11.0));
+        estoque.novoPreco("ProdutoE", gerarValorAleatorio(10.0, 12.0));
         estoque.novoDesc("ProdutoA", gerarValorAleatorio(0.0, 0.2));
         estoque.novoDesc("ProdutoB", gerarValorAleatorio(0.0, 0.2));
+        estoque.novoDesc("ProdutoC", gerarValorAleatorio(0.0, 0.2));
+        estoque.novoDesc("ProdutoD", gerarValorAleatorio(0.0, 0.2));
+        estoque.novoDesc("ProdutoE", gerarValorAleatorio(0.0, 0.2));
     }
 }
 
@@ -135,12 +153,19 @@ int main() {
 
     estoque.adicionarProduto("ProdutoA", 0, 5.99, 0.0);
     estoque.adicionarProduto("ProdutoB", 0, 6.66, 0.0);
+    estoque.adicionarProduto("ProdutoC", 0, 6.99, 0.0);
+    estoque.adicionarProduto("ProdutoD", 0, 9.69, 0.0);
+    estoque.adicionarProduto("ProdutoE", 0, 16.66, 0.0);
+    
     auto inicio = chrono::high_resolution_clock::now();
 
     // Número de trabalhadores
-    const int nt = 2;
+    const int nt = 4;
     for(i = 0; i < nt; i++){
         simularEntrada(estoque, vezes, qtdEntrada);
+    }
+
+    for(i = 0; i < nt; i++){;
         simularSaida(estoque, vezes, qtdSaida);
     }
 
