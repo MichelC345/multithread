@@ -5,6 +5,7 @@
 #include <chrono>
 #include <vector>
 #include <thread>
+#include <fstream>
 
 using namespace std;
 
@@ -68,6 +69,10 @@ public:
         }
     }
 
+    unordered_map<string, Produto>& getProdutos() {
+        return produtos;
+    }
+
     // As funções de entrada e saída criam o problema do produtor / consumidor
     void entrada(const string& nome, int qtd) {;
         auto it = produtos.find(nome);
@@ -120,55 +125,49 @@ float gerarValorAleatorio(float min, float max) {
 }
 
 void simularEntrada(Estoque& estoque, int vezes, int quantidade) {
+    auto& produtos = estoque.getProdutos();
     for (int i = 0; i < vezes; i++) {
-        estoque.entrada("ProdutoA", quantidade);
-        estoque.entrada("ProdutoB", quantidade);
-        estoque.entrada("ProdutoC", quantidade);
-        estoque.entrada("ProdutoD", quantidade);
-        estoque.entrada("ProdutoE", quantidade);
-        estoque.novoPreco("ProdutoA", gerarValorAleatorio(6.0, 8.0));
-        estoque.novoPreco("ProdutoB", gerarValorAleatorio(6.0, 8.0));
-        estoque.novoPreco("ProdutoC", gerarValorAleatorio(7.0, 9.0));
-        estoque.novoPreco("ProdutoD", gerarValorAleatorio(7.0, 9.0));
-        estoque.novoPreco("ProdutoE", gerarValorAleatorio(8.0, 10.0));
-        estoque.novoDesc("ProdutoA", gerarValorAleatorio(0.2, 0.5));
-        estoque.novoDesc("ProdutoB", gerarValorAleatorio(0.2, 0.5));
-        estoque.novoDesc("ProdutoC", gerarValorAleatorio(0.2, 0.5));
-        estoque.novoDesc("ProdutoD", gerarValorAleatorio(0.2, 0.5));
-        estoque.novoDesc("ProdutoE", gerarValorAleatorio(0.2, 0.5));
+        for (auto& [nome, produto] : produtos) {
+            estoque.entrada(nome, quantidade);
+            estoque.novoPreco(nome, gerarValorAleatorio(5.0, 11.0)); // Faixa de preço aleatória
+            estoque.novoDesc(nome, gerarValorAleatorio(0.1, 0.5));  // Faixa de desconto aleatória
+        }
     }
 }
 
 void simularSaida(Estoque& estoque, int vezes, int quantidade) {
+    auto& produtos = estoque.getProdutos();
     for (int i = 0; i < vezes; i++) {
-        estoque.saida("ProdutoA", quantidade);
-        estoque.saida("ProdutoB", quantidade);
-        estoque.saida("ProdutoC", quantidade);
-        estoque.saida("ProdutoD", quantidade);
-        estoque.saida("ProdutoE", quantidade);
-        estoque.novoPreco("ProdutoA", gerarValorAleatorio(8.0, 10.0));
-        estoque.novoPreco("ProdutoB", gerarValorAleatorio(8.0, 10.0));
-        estoque.novoPreco("ProdutoC", gerarValorAleatorio(9.0, 11.0));
-        estoque.novoPreco("ProdutoD", gerarValorAleatorio(9.0, 11.0));
-        estoque.novoPreco("ProdutoE", gerarValorAleatorio(10.0, 12.0));
-        estoque.novoDesc("ProdutoA", gerarValorAleatorio(0.0, 0.2));
-        estoque.novoDesc("ProdutoB", gerarValorAleatorio(0.0, 0.2));
-        estoque.novoDesc("ProdutoC", gerarValorAleatorio(0.0, 0.2));
-        estoque.novoDesc("ProdutoD", gerarValorAleatorio(0.0, 0.2));
-        estoque.novoDesc("ProdutoE", gerarValorAleatorio(0.0, 0.2));
+        for (auto& [nome, produto] : produtos) {
+            estoque.saida(nome, quantidade);
+            estoque.novoPreco(nome, gerarValorAleatorio(10.0, 20.0)); // Faixa de preço aleatória
+            estoque.novoDesc(nome, gerarValorAleatorio(0.0, 0.2));  // Faixa de desconto aleatória
+        }
     }
+}
+
+void lerProdutosDeArquivo(const string& nomeArquivo, Estoque& estoque) {
+    ifstream arquivo(nomeArquivo);
+    if (!arquivo) {
+        cerr << "Erro ao abrir o arquivo " << nomeArquivo << endl;
+        return;
+    }
+
+    string nome;
+    int quantidade;
+    float preco, desconto;
+    while (arquivo >> nome >> quantidade >> preco >> desconto) {
+        estoque.adicionarProduto(nome, quantidade, preco, desconto);
+    }
+    arquivo.close();
 }
 
 int main() {
     Estoque estoque;
     int i;
-    const int vezes = 50, qtdEntrada = 1, qtdSaida = 1;
+    const int vezes = 100, qtdEntrada = 1, qtdSaida = 1;
 
-    estoque.adicionarProduto("ProdutoA", 0, 5.99, 0.0);
-    estoque.adicionarProduto("ProdutoB", 0, 6.66, 0.0);
-    estoque.adicionarProduto("ProdutoC", 0, 6.99, 0.0);
-    estoque.adicionarProduto("ProdutoD", 0, 9.69, 0.0);
-    estoque.adicionarProduto("ProdutoE", 0, 16.66, 0.0);
+    lerProdutosDeArquivo("produtos.txt", estoque);
 
     auto inicio = chrono::high_resolution_clock::now();
     
