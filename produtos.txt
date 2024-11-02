@@ -15,3 +15,5 @@ ProdutoN 0 9.69 0.0
 ProdutoO 0 16.66 0.0
 ProdutoP 0 9.69 0.0
 ProdutoQ 0 16.66 0.0
+ProdutoR 0 20.66 0.0
+ProdutoS 0 30.66 0.0

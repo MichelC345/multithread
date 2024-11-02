@@ -58,14 +58,12 @@ public:
 
     void adicionarProduto(const string& nome, int quantidadeInicial, float precoInicial, float descInicial) {
         produtos.emplace(nome, Produto(nome, quantidadeInicial, precoInicial, descInicial));
-        //cout << nome << " adicionado ao estoque com quantidade: " << quantidadeInicial << " e preco: " << precoInicial << endl;
     }
 
     void removerProduto(const string& nome) {
         auto it = produtos.find(nome);
         if (it != produtos.end()) {
             produtos.erase(it);
-            //cout << "Produto " << nome << " removido do estoque." << endl;
         }
     }
 
@@ -79,7 +77,6 @@ public:
         if (it != produtos.end()) { // Descomente o while para colocar uma verificação de limite
           //  while (it->second.getQuantidade() + qtd > max){}
             it->second.adicionarEstoque(qtd);
-           // cout << "Adicionou " << qtd << " unidades de " << nome << " ao estoque." << endl;
         }
     }
 
@@ -88,7 +85,6 @@ public:
         if (it != produtos.end()) {
           //  while (it->second.getQuantidade() - qtd < min){}
             it->second.retirarEstoque(qtd);
-            //cout << "Removeu " << qtd << " unidades de " << nome << " do estoque." << endl;
         }
     }
 
@@ -96,7 +92,6 @@ public:
         auto it = produtos.find(nome);
         if (it != produtos.end()) {
             it->second.atualizarPreco(preco);
-           // cout << "Preco do produto " << nome << " atualizado para " << preco << endl;
         }
     }
 
@@ -104,7 +99,6 @@ public:
         auto it = produtos.find(nome);
         if (it != produtos.end()) {
             it->second.atualizarDesconto(desc);
-            //cout << "Aturalizou desconto do produto " << nome << " para " << desc << endl;
         }
     }
 
@@ -127,10 +121,11 @@ float gerarValorAleatorio(float min, float max) {
 void simularEntrada(Estoque& estoque, int vezes, int quantidade) {
     auto& produtos = estoque.getProdutos();
     for (int i = 0; i < vezes; i++) {
+        // Percorre unordered_map produtos modificando a quantidade, preço e desconto
         for (auto& [nome, produto] : produtos) {
             estoque.entrada(nome, quantidade);
-            estoque.novoPreco(nome, gerarValorAleatorio(5.0, 11.0)); // Faixa de preço aleatória
-            estoque.novoDesc(nome, gerarValorAleatorio(0.1, 0.5));  // Faixa de desconto aleatória
+            estoque.novoPreco(nome, gerarValorAleatorio(5.0, 11.0));
+            estoque.novoDesc(nome, gerarValorAleatorio(0.1, 0.5));
         }
     }
 }
@@ -138,10 +133,11 @@ void simularEntrada(Estoque& estoque, int vezes, int quantidade) {
 void simularSaida(Estoque& estoque, int vezes, int quantidade) {
     auto& produtos = estoque.getProdutos();
     for (int i = 0; i < vezes; i++) {
+        // Percorre unordered_map produtos modificando a quantidade, preço e desconto
         for (auto& [nome, produto] : produtos) {
             estoque.saida(nome, quantidade);
-            estoque.novoPreco(nome, gerarValorAleatorio(10.0, 20.0)); // Faixa de preço aleatória
-            estoque.novoDesc(nome, gerarValorAleatorio(0.0, 0.2));  // Faixa de desconto aleatória
+            estoque.novoPreco(nome, gerarValorAleatorio(10.0, 20.0));
+            estoque.novoDesc(nome, gerarValorAleatorio(0.0, 0.2));
         }
     }
 }
