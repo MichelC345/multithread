@@ -7,7 +7,6 @@
 #include <thread>
 #include <mutex>
 #include <fstream>
-#include <cstdlib>
 
 using namespace std;
 
@@ -166,23 +165,17 @@ void lerProdutosArquivo(const string& nomeArquivo, Estoque& estoque) {
     arquivo.close();
 }
 
-int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        std::cerr << "Uso: " << argv[0] << " <vezes> <nt>" << std::endl;
-        return 1;
-    }
-
-    int vezes = atoi(argv[1]);
-    // número de threads = número de trabalhadores
-    int nt = atoi(argv[2]);
-
+int main() {
     Estoque estoque;
-    int qtdEntrada = 1, qtdSaida = 1, i;
+    int i;
+    const int vezes = 100, qtdEntrada = 1, qtdSaida = 1;
 
     lerProdutosArquivo("produtos.txt", estoque);
 
     auto inicio = chrono::high_resolution_clock::now();
     
+    // número de threads = número de trabalhadores
+    const int nt = 4;
     vector<thread> threads;
     for(i = 0; i < nt; i++){
         threads.emplace_back(simularEntrada, ref(estoque), vezes, qtdEntrada);

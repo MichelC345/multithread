@@ -4,7 +4,6 @@
 #include <random>
 #include <chrono>
 #include <fstream>
-#include <cstdlib>
 
 using namespace std;
 
@@ -154,23 +153,17 @@ void lerProdutosArquivo(const string& nomeArquivo, Estoque& estoque) {
     arquivo.close();
 }
 
-int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        std::cerr << "Uso: " << argv[0] << " <vezes> <nt>" << std::endl;
-        return 1;
-    }
-
-    int vezes = atoi(argv[1]);
-    // número de threads = número de trabalhadores
-    int nt = atoi(argv[2]);
-
+int main() {
     Estoque estoque;
-    int qtdEntrada = 1, qtdSaida = 1, i;
+    int i;
+    const int vezes = 100, qtdEntrada = 1, qtdSaida = 1;
 
     lerProdutosArquivo("produtos.txt", estoque);
     
     auto inicio = chrono::high_resolution_clock::now();
 
+    // Número de trabalhadores
+    const int nt = 4;
     for(i = 0; i < nt; i++){
         simularEntrada(estoque, vezes, qtdEntrada);
     }
