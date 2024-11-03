@@ -48,9 +48,11 @@ public:
 class Estoque {
 private:
     unordered_map<string, Produto> produtos;
-    mutex mtx;
     const int max = 50;
     const int min = 0;
+    mutex mtxEstoque;
+    mutex mtxPreco;
+    mutex mtxDesc;
 
 public:
     Estoque() {}
@@ -77,7 +79,7 @@ public:
         auto it = produtos.find(nome);
         if (it != produtos.end()) { // Descomente o while para colocar uma verificação de limite
            // while (it->second.getQuantidade() + qtd > max){}
-            lock_guard<mutex> lock(mtx);
+            lock_guard<mutex> lock(mtxEstoque);
             it->second.adicionarEstoque(qtd);
         }
     }
@@ -86,7 +88,7 @@ public:
         auto it = produtos.find(nome);
         if (it != produtos.end()) {
            // while (it->second.getQuantidade() - qtd < min){}
-            lock_guard<mutex> lock(mtx);
+            lock_guard<mutex> lock(mtxEstoque);
             it->second.retirarEstoque(qtd);
         }
     }
@@ -94,7 +96,7 @@ public:
     void novoPreco(const string& nome, float preco) {
         auto it = produtos.find(nome);
         if (it != produtos.end()) {
-            lock_guard<mutex> lock(mtx);
+            lock_guard<mutex> lock(mtxPreco);
             it->second.atualizarPreco(preco);
         }
     }
@@ -102,7 +104,7 @@ public:
     void novoDesc(const string& nome, float desc) {
         auto it = produtos.find(nome);
         if (it != produtos.end()) {
-            lock_guard<mutex> lock(mtx);
+            lock_guard<mutex> lock(mtxDesc);
             it->second.atualizarDesconto(desc);
         }
     }
